@@ -120,6 +120,36 @@ node scripts/web_login_and_enable_telnet.js 192.168.1.1 user 你的光猫背面�
 
 要接着在 telnet 里操作（改桥接、看拨号等）就保持开启，心里有数即可。
 
+## 找回宽带（PPPoE）拨号账号密码
+
+同一份 `/config/work/lastgood.xml` 也保存了宽带拨号凭据。先按上面的步骤开启 telnet，再运行：
+
+```bash
+python3 scripts/telnet_run.py 192.168.1.1 user '光猫背面密码' \
+  'grep -a -n -E "Name=\"(aucWanName|aucUsername|aucPassword)\"" /config/work/lastgood.xml' \
+  'ps | grep -i ppp'
+```
+
+在 `WAN_CONNECTION_ATTR_TAB` 中找到 INTERNET 连接（通常 `aucWanName` 含 `INTERNET`、`ucServiceList=4`、接口名以 `pppoe-` 开头）：
+
+- `aucUsername`：宽带拨号账号
+- `aucPassword`：宽带拨号密码（部分固件明文保存）
+
+`ps | grep -i ppp` 显示的是设备正在使用的 `pppd` 参数，若其中出现 `user ... password ...`，可用来交叉验证当前实际拨号凭据。
+
+> 注意：配置里 TR-069/CWMP 段也有同名 `aucUsername` / `aucPassword`，那是运营商远程管理凭据，不是宽带拨号凭据。应以所在 `<Dir>` 和 INTERNET WAN 连接特征为准。
+
+## Web 登录加密算法说明
+
+`web_login_password` 不是 SHA-256 哈希，而是 AES-256-CBC 密文：
+
+1. key：密码字符的 charCode 转 hex 后拼接，截断或补 `0` 到 64 个 hex 字符（32 字节）
+2. IV：每次随机 16 字节
+3. padding：PKCS#7
+4. 提交值：`ivHex + ciphertextHex`
+
+因此同一密码每次输出都不同，不能拿 SHA-256 或另一次加密结果直接比较。该算法仅用于 Web 登录传输；`lastgood.xml` 里的凭据字段是否明文由固件决定。
+
 ### 手动方式（不用脚本）
 
 telnet 登录后依次执行：
