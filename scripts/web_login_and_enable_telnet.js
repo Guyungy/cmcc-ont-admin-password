@@ -8,8 +8,8 @@
  *   node web_login_and_enable_telnet.js <光猫IP> <账号> <密码> --check     # 只登录，不碰 telnet
  *
  * 例:
- *   node web_login_and_enable_telnet.js 192.168.1.1 user 'Z55HL@GD'
- *   node web_login_and_enable_telnet.js 192.168.1.1 CMCCAdmin 'PCdq%RZ3' --off
+ *   node web_login_and_enable_telnet.js 192.168.1.1 user '设备背面密码'
+ *   node web_login_and_enable_telnet.js 192.168.1.1 CMCCAdmin '提取到的超管密码' --off
  *
  * 依赖: 仅 Node 内置模块 (crypto / net)。Node 18+ 自带全局 fetch。
  *
